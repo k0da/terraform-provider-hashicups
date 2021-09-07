@@ -16,20 +16,20 @@ on:
       - "*"
 jobs:
   goreleaser:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
+    env:
+      GNUPGHOME: ${{ env.GITHUB_WORKSPACE}}/.gnupg
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Unshallow
-        run: git fetch --prune --unshallow
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: 1.14
-      - name: create pubring.gpg
+          go-version: 1.16
+      - name: gpg_hack
         run: |
-          mkdir -p ~/.gnupg
-          touch ~/.gnupg/pubring.gpg
+          mkdir -p $GNUPGHOME
+          touch $GNUPGHOME/pubring.gpg
       - name: Import GPG key
         id: import_gpg
         uses: hashicorp/ghaction-import-gpg@v2.1.0
@@ -44,7 +44,7 @@ jobs:
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker://absaoss/tfreg-golang:v0.0.1
+      - uses: docker://absaoss/tfreg-golang:testing
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts_dir: dist
