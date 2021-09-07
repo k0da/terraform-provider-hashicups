@@ -13,7 +13,7 @@ name: release
 on:
   push:
     tags:
-      - "v*"
+      - "*"
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
@@ -26,6 +26,10 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.14
+      - name: create pubring.gpg
+        run: |
+          mkdir -p ~/.gnupg
+          touch ~/.gnupg/pubring.gpg
       - name: Import GPG key
         id: import_gpg
         uses: hashicorp/ghaction-import-gpg@v2.1.0
@@ -36,7 +40,14 @@ jobs:
         uses: goreleaser/goreleaser-action@v2
         with:
           version: latest
-          args: release --rm-dist
+          args: release
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker://absaoss/tfreg-golang:v0.0.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts_dir: dist
+          repository: k0da.github.io
+          namespace: foo
+          gpg_fingerprint: ${{ steps.import_gpg.outputs.fingerprint }}
