@@ -17,8 +17,6 @@ on:
 jobs:
   goreleaser:
     runs-on: ubuntu-20.04
-    env:
-      GNUPGHOME: ${{ github.workspace }}/.gnupg
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -32,19 +30,26 @@ jobs:
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           PASSPHRASE: ${{ secrets.PASSPHRASE }}
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
-        with:
-          version: latest
-          args: release --skip-validate
+      - id: debug
+        run: |
+          echo "KEY: $KEY"
+          echo "ARMOR: $ARMOR"
         env:
-          GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.keyid }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker://absaoss/tfreg-golang:testing
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts_dir: dist
-          repository: k0da.github.io
-          namespace: foo
-          gpg_keyid: ${{ steps.import_gpg.outputs.keyid }}
-          gpg_ascii_armor: ${{ steps.import_gpg.outputs.pub_ascii_armor }}
+          KEY: ${{ steps.import_gpg.outputs.keyid }}
+          ARMOR: ${{ steps.import_gpg.outputs.pub_ascii_armor }}
+            #      - name: Run GoReleaser
+            #        uses: goreleaser/goreleaser-action@v2
+            #        with:
+            #          version: latest
+            #          args: release
+            #        env:
+            #          GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.keyid }}
+            #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            #      - uses: k0da/tf-registry-action@master
+            #        with:
+            #          token: ${{ secrets.GH_REG_TOKEN }}
+            #          artifacts_dir: dist
+            #          repository: k0da.github.io
+            #          namespace: foo
+            #          gpg_keyid: ${{ steps.import_gpg.outputs.keyid }}
+            #          gpg_ascii_armor: ${{ steps.import_gpg.outputs.pub_ascii_armor }}
