@@ -17,8 +17,6 @@ on:
 jobs:
   goreleaser:
     runs-on: ubuntu-20.04
-    env:
-      GNUPGHOME: ${{ github.workspace }}/.gnupg
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -36,13 +34,13 @@ jobs:
         uses: goreleaser/goreleaser-action@v2
         with:
           version: latest
-          args: release --skip-validate
+          args: release --skip-publish
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.keyid }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker://absaoss/tfreg-golang:testing
+      - uses: k0da/tf-registry-action@master
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_REG_TOKEN }}
           artifacts_dir: dist
           repository: k0da.github.io
           namespace: foo
