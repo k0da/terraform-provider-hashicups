@@ -38,11 +38,10 @@ jobs:
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.keyid }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: k0da/tf-registry-action@master
+      - uses: AbsaOSS/ghpages-to-tf-provider-registry@v0.1
         with:
           token: ${{ secrets.GH_REG_TOKEN }}
           artifacts_dir: dist
           repository: k0da.github.io
-          namespace: foo
           gpg_keyid: ${{ steps.import_gpg.outputs.keyid }}
           gpg_ascii_armor: ${{ steps.import_gpg.outputs.pub_ascii_armor }}
